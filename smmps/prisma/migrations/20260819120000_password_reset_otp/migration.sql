@@ -1,0 +1,2 @@
+-- Recreated so Prisma can resolve this already-applied migration.
+-- Password reset continues to use password_reset_tokens.

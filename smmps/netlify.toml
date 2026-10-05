@@ -1,0 +1,22 @@
+[build]
+  command = "npx prisma generate && node scripts/netlify-build.mjs"
+  publish = ".next"
+
+# Let Netlify pick the latest OpenNext adapter (do not pin in package.json).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  included_files = [
+    "node_modules/.prisma/client/**",
+    "node_modules/@prisma/client/**",
+    "prisma/**"
+  ]
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"

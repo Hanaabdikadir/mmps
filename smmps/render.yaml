@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: hana-mmps
+    runtime: node
+    plan: free
+    rootDir: smmps
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false

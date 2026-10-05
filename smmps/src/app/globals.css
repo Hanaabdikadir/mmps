@@ -1,0 +1,1958 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f7f5;
+  --foreground: #0f1f1a;
+  --card: #ffffff;
+  --card-border: #dce8e3;
+  --primary: #059669;
+  --primary-dark: #047857;
+  --primary-light: #34d399;
+  --accent: #f59e0b;
+  --muted: #5f726b;
+  --hero-from: #022c22;
+  --hero-mid: #064e3b;
+  --hero-to: #047857;
+  --shadow: none;
+  --shadow-lg: none;
+  --glow-emerald: 0 0 40px rgba(16, 185, 129, 0.25);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-outfit), system-ui, sans-serif;
+  --font-hero: var(--font-outfit), system-ui, sans-serif;
+}
+
+html {
+  background-color: #064e3b;
+  overflow-x: clip;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+a,
+button,
+[role="button"],
+summary {
+  touch-action: manipulation;
+}
+
+@keyframes nav-bar {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+body {
+  min-width: 0;
+  background: var(--background);
+  color: var(--foreground);
+  overscroll-behavior: none;
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+  letter-spacing: -0.011em;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.028em;
+}
+
+/* Register form is taller than the screen — scroll the page, do not clip it. */
+html:has([data-register-page]) {
+  height: auto;
+  overflow-x: clip;
+  overflow-y: scroll;
+}
+html:has([data-register-page]) body {
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+html:has([data-register-page]) main {
+  flex: 1 0 auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Keeps the MMPS green behind the header if the page is pulled past the top */
+html::before {
+  content: "";
+  position: fixed;
+  top: -50vh;
+  right: 0;
+  left: 0;
+  height: 50vh;
+  background: #064e3b;
+  pointer-events: none;
+}
+
+/* Ultra-narrow / watch-like viewports */
+@media (max-width: 360px) {
+  :root {
+    font-size: 15px;
+  }
+
+  .page-shell {
+    padding-left: 0.625rem !important;
+    padding-right: 0.625rem !important;
+  }
+}
+
+@media (max-width: 280px) {
+  :root {
+    font-size: 14px;
+  }
+}
+
+/* Professional admin Save buttons — press, save, success */
+.admin-save-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  min-width: min(15rem, 100%);
+  padding: 0.7rem 1.75rem;
+  border: 0;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #0d6b52 0%, #0a5240 55%, #084536 100%);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.14) inset,
+    0 4px 14px rgba(8, 69, 54, 0.28),
+    0 1px 2px rgba(8, 69, 54, 0.18);
+  transition:
+    transform 160ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease,
+    filter 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.admin-save-btn--block {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.admin-save-btn__shine {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.16) 48%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+  opacity: 0;
+}
+
+.admin-save-btn__content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.admin-save-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #117a5e 0%, #0c5f4a 55%, #0a5240 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 6px 18px rgba(8, 69, 54, 0.34),
+    0 2px 4px rgba(8, 69, 54, 0.2);
+}
+
+.admin-save-btn:hover:not(:disabled) .admin-save-btn__shine {
+  opacity: 1;
+  animation: adminSaveShine 700ms ease;
+}
+
+.admin-save-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 2px 8px rgba(8, 69, 54, 0.22);
+}
+
+.admin-save-btn:focus-visible {
+  outline: 2px solid #34d399;
+  outline-offset: 3px;
+}
+
+.admin-save-btn--saving {
+  cursor: wait;
+  filter: saturate(0.95);
+}
+
+.admin-save-btn--saved {
+  background: linear-gradient(180deg, #10b981 0%, #059669 55%, #047857 100%) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 4px 14px rgba(5, 150, 105, 0.35) !important;
+  opacity: 1 !important;
+  cursor: default;
+  animation: adminSavePop 320ms ease;
+}
+
+.admin-save-btn:disabled:not(.admin-save-btn--saved):not(.admin-save-btn--saving) {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@keyframes adminSaveShine {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes adminSavePop {
+  0% {
+    transform: scale(0.97);
+  }
+  55% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-save-btn,
+  .admin-save-btn__shine,
+  .admin-save-btn--saved {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.hero-pattern {
+  background-color: #022c22;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 90%, rgba(16, 185, 129, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(5, 150, 105, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(52, 211, 153, 0.08) 0%, transparent 60%),
+    linear-gradient(145deg, #022c22 0%, #064e3b 48%, #047857 100%);
+}
+
+/* Homepage hero — layered teal/emerald with warm light and vignette */
+.home-hero-pattern {
+  background-color: #011916;
+  background-image:
+    radial-gradient(ellipse 55% 70% at 100% 0%, rgba(253, 224, 71, 0.34) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 55% at -8% 108%, rgba(94, 234, 212, 0.28) 0%, transparent 52%),
+    radial-gradient(ellipse 45% 40% at 38% 48%, rgba(52, 211, 153, 0.2) 0%, transparent 62%),
+    radial-gradient(ellipse 90% 80% at 50% 120%, rgba(2, 44, 34, 0.75) 0%, transparent 55%),
+    linear-gradient(168deg, #011916 0%, #04352f 28%, #0b6b5c 58%, #047857 82%, #064e3b 100%);
+}
+
+.livestock-mesh {
+  background-color: #f4f7f5;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.06) 0%, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(6, 95, 70, 0.05) 0%, transparent 50%);
+}
+
+/* Livestock type listings grow with many markets — scroll the page, do not clip. */
+html:has(.livestock-type-page) {
+  height: auto;
+  overflow-x: clip;
+  overflow-y: scroll;
+}
+html:has(.livestock-type-page) body {
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+html:has(.livestock-type-page) main {
+  flex: 1 0 auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+body:has(.livestock-category-page) .footer-bg-shell,
+body:has(.livestock-type-page) .footer-bg-shell {
+  margin-top: 0;
+}
+
+.water-mesh {
+  background-color: #f0f9ff;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(37, 99, 235, 0.06) 0%, transparent 50%);
+}
+
+.water-hero-pattern {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 90%, rgba(14, 165, 233, 0.35) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(6, 182, 212, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(56, 189, 248, 0.1) 0%, transparent 60%),
+    linear-gradient(145deg, #0c4a6e 0%, #0369a1 42%, #0284c7 100%);
+}
+
+.water-shimmer-text {
+  background: linear-gradient(90deg, #fff 0%, #bae6fd 50%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+.water-hero-stat {
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.water-section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #0ea5e940, transparent);
+}
+
+.electricity-mesh {
+  background-color: #fdfbf7;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(249, 115, 22, 0.06) 0%, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(217, 119, 6, 0.05) 0%, transparent 50%);
+}
+
+.electricity-hero-pattern {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 90%, rgba(245, 158, 11, 0.35) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(249, 115, 22, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(253, 230, 138, 0.1) 0%, transparent 60%),
+    linear-gradient(145deg, #78350f 0%, #b45309 42%, #d97706 100%);
+}
+
+.electricity-shimmer-text {
+  background: linear-gradient(90deg, #fff 0%, #fde68a 50%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+.electricity-section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f59e0b40, transparent);
+}
+
+.reports-mesh {
+  background-color: #faf5ff;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.09) 0%, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(192, 132, 252, 0.07) 0%, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(109, 40, 217, 0.05) 0%, transparent 50%);
+}
+
+.reports-hero-pattern {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 90%, rgba(139, 92, 246, 0.35) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(217, 70, 239, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(167, 139, 250, 0.1) 0%, transparent 60%),
+    linear-gradient(145deg, #4c1d95 0%, #6d28d9 42%, #9333ea 100%);
+}
+
+.reports-shimmer-text {
+  background: linear-gradient(90deg, #fff 0%, #ddd6fe 50%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+.reports-section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #a855f740, transparent);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-lg);
+}
+
+.hero-stat-card {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(209, 250, 229, 0.12) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: none;
+}
+
+.hero-stat-value {
+  font-size: 1.375rem;
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #fff;
+  min-height: 2.5rem;
+}
+
+.glow-card {
+  box-shadow: var(--shadow-lg), var(--glow-emerald);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.5); }
+
+/* Dropdown lists scroll with the wheel — no colored thumb line */
+.register-form-select-list,
+.register-form-select-list-district {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.register-form-select-list::-webkit-scrollbar,
+.register-form-select-list-district::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+  border-color: var(--primary);
+}
+
+/* Registration chat: single focus border only (no double glow) */
+textarea.registration-chat-input:focus,
+textarea.registration-chat-input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #0f766e !important;
+}
+
+@keyframes chatLivePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(49, 162, 76, 0.55); }
+  50% { transform: scale(1.03); box-shadow: 0 0 0 8px rgba(49, 162, 76, 0); }
+}
+
+@keyframes chatLiveDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+@keyframes statusPendingGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+    transform: translateY(-1px);
+  }
+}
+
+.chat-live-badge {
+  animation: chatLivePulse 1.8s ease-in-out infinite;
+}
+
+.chat-live-dot {
+  animation: chatLiveDot 1.2s ease-in-out infinite;
+}
+
+.animate-status-pending {
+  animation: statusPendingGlow 2s ease-in-out infinite;
+}
+
+@keyframes watchSeconds {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-watch-seconds {
+  animation: watchSeconds 8s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes registerOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes registerPulseRing {
+  0% { transform: scale(0.92); opacity: 0.55; }
+  70% { transform: scale(1.12); opacity: 0; }
+  100% { transform: scale(1.12); opacity: 0; }
+}
+@keyframes registerShimmerBar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-register-orbit {
+  animation: registerOrbit 2.4s linear infinite;
+}
+.animate-register-pulse-ring {
+  animation: registerPulseRing 1.8s ease-out infinite;
+}
+@keyframes registerSuccessPop {
+  0% {
+    transform: scale(0.45);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes registerSuccessGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(255, 255, 255, 0.45),
+      0 8px 24px -8px rgba(0, 0, 0, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 28px 6px rgba(255, 255, 255, 0.35),
+      0 12px 32px -8px rgba(0, 0, 0, 0.2);
+  }
+}
+@keyframes registerSuccessCheck {
+  0% {
+    transform: scale(0.5) rotate(-12deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12) rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-register-success-pop {
+  animation: registerSuccessPop 0.65s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+.animate-register-success-glow {
+  animation: registerSuccessGlow 2.4s ease-in-out infinite;
+}
+.animate-register-success-check {
+  animation: registerSuccessCheck 0.75s cubic-bezier(0.34, 1.35, 0.64, 1) 0.12s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-register-success-pop,
+  .animate-register-success-glow,
+  .animate-register-success-check {
+    animation: none;
+  }
+}
+
+.animate-register-shimmer-bar {
+  animation: registerShimmerBar 1.35s ease-in-out infinite;
+}
+
+.register-result-shell {
+  background-color: #fafcfb;
+  background-image:
+    radial-gradient(at 50% 0%, rgba(16, 185, 129, 0.05) 0%, transparent 55%),
+    radial-gradient(at 100% 100%, rgba(20, 184, 166, 0.04) 0%, transparent 45%);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseLive {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes sectorPillIn {
+  0% { opacity: 0; transform: translateY(14px) scale(0.96); }
+  65% { transform: translateY(-3px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-sector-pill {
+  opacity: 0;
+  animation: sectorPillIn 0.6s ease-out forwards;
+}
+
+.sector-pill-interactive {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    filter 0.3s ease;
+}
+
+.sector-pill-interactive:hover {
+  transform: translateY(-3px) scale(1.03);
+  filter: brightness(1.08);
+  box-shadow: none;
+}
+
+/* Footer — animated background grid + drifting glow orbs */
+.footer-bg-shell {
+  background-color: #022c22;
+  background:
+    radial-gradient(ellipse 120% 80% at 15% 100%, rgba(16, 185, 129, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 70% at 85% 0%, rgba(5, 150, 105, 0.14) 0%, transparent 50%),
+    linear-gradient(160deg, #022c22 0%, #064e3b 48%, #022c22 100%);
+  background-size: 100% 100%, 100% 100%, 200% 200%;
+  animation: footerGradientShift 24s ease-in-out infinite;
+}
+
+.footer-bg-grid {
+  background-image: url("data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2334d399' fill-opacity='1'%3E%3Cpath d='M24 0h1v48h-1V0zm24 24v1H0v-1h48z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 48px 48px;
+  opacity: 0.1;
+  animation: footerGridDrift 32s linear infinite;
+}
+
+.footer-bg-orb-a {
+  animation: footerOrbDriftA 20s ease-in-out infinite;
+}
+
+.footer-bg-orb-b {
+  animation: footerOrbDriftB 26s ease-in-out infinite;
+}
+
+@keyframes footerGradientShift {
+  0%, 100% { background-position: 0% 50%, 0% 50%, 0% 50%; }
+  50% { background-position: 0% 50%, 0% 50%, 100% 50%; }
+}
+
+@keyframes footerGridDrift {
+  0% { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
+}
+
+@keyframes footerOrbDriftA {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  50% { transform: translate(28px, -22px) scale(1.12); opacity: 0.85; }
+}
+
+@keyframes footerOrbDriftB {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  50% { transform: translate(-24px, 18px) scale(1.08); opacity: 0.9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-bg-shell,
+  .footer-bg-grid,
+  .footer-bg-orb-a,
+  .footer-bg-orb-b {
+    animation: none !important;
+  }
+}
+
+.footer-nav-card {
+  position: relative;
+  overflow: hidden;
+  border: 1.5px solid rgba(52, 211, 153, 0.45);
+  background: linear-gradient(
+    155deg,
+    rgba(6, 78, 59, 0.72) 0%,
+    rgba(4, 47, 46, 0.88) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.12);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.footer-nav-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2334d399' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.footer-nav-card::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: calc(0.75rem - 5px);
+  pointer-events: none;
+}
+
+.footer-nav-card:hover {
+  border-color: rgba(110, 231, 183, 0.65);
+  background: linear-gradient(
+    155deg,
+    rgba(6, 95, 70, 0.82) 0%,
+    rgba(4, 60, 55, 0.92) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 4px 14px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.footer-nav-card:hover::after {
+  border-color: rgba(110, 231, 183, 0.32);
+}
+
+/* Shared by water + electricity provider detail pages */
+.provider-card-grid,
+.electricity-provider-card-grid,
+.water-provider-card-grid,
+.livestock-provider-card-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.provider-card-grid > *,
+.electricity-provider-card-grid > *,
+.water-provider-card-grid > *,
+.livestock-provider-card-grid > * {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+/*
+ * Price Calculator shell — fixed 490px width; height stretches with sibling cards.
+ */
+.provider-price-calculator {
+  display: flex;
+  width: 490px;
+  min-height: 490px;
+  height: 100%;
+  max-width: min(490px, 100%);
+  margin-inline: auto;
+}
+
+.provider-price-calculator > * {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.provider-price-calculator-cell {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  height: 100%;
+}
+
+/* Desktop: calculator column | wide rates history — equal row heights */
+@media (min-width: 900px) {
+  .provider-card-grid,
+  .electricity-provider-card-grid,
+  .water-provider-card-grid,
+  .livestock-provider-card-grid {
+    grid-template-columns: minmax(490px, 490px) minmax(0, 1fr);
+    grid-template-rows: minmax(490px, auto) minmax(26rem, auto);
+    align-items: stretch;
+    justify-items: stretch;
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 899.98px) {
+  .provider-card-grid,
+  .electricity-provider-card-grid,
+  .water-provider-card-grid,
+  .livestock-provider-card-grid {
+    grid-template-columns: minmax(0, 490px) minmax(0, 1fr);
+    grid-auto-rows: minmax(490px, auto);
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .provider-price-calculator {
+    width: 490px;
+    max-width: min(490px, 100%);
+    height: 100%;
+  }
+}
+
+.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+.animate-fade-in-left { animation: fadeInLeft 0.55s ease-out forwards; }
+.animate-fade-in-right {
+  animation: fadeInRight 0.55s ease-out 0.12s forwards;
+  opacity: 0;
+}
+.animate-pulse-live { animation: pulseLive 2s ease-in-out infinite; }
+
+@keyframes noocyadaSoftIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes noocyadaLineGrow {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes noocyadaRowIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-noocyada-soft {
+  opacity: 0;
+  animation: noocyadaSoftIn 0.45s ease-out forwards;
+}
+
+.animate-noocyada-line {
+  transform-origin: left center;
+  opacity: 0;
+  animation: noocyadaLineGrow 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-noocyada-row {
+  opacity: 0;
+  animation: noocyadaRowIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Soft text crossfade on EN↔SO — cards stay put; only words fade. */
+@keyframes noocyadaLangSwap {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-noocyada-lang {
+  display: inline-block;
+  animation: noocyadaLangSwap 0.28s ease-out both;
+}
+
+@keyframes pendingClockPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.35);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(251, 191, 36, 0);
+  }
+}
+
+@keyframes pendingClockTick {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(6deg);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+}
+
+.animate-pending-clock-well {
+  animation: pendingClockPulse 2.4s ease-in-out infinite;
+}
+
+.animate-pending-clock-icon {
+  animation: pendingClockTick 2.8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pending-clock-well,
+  .animate-pending-clock-icon,
+  .animate-pulse-live {
+    animation: none;
+  }
+}
+
+@keyframes login-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes sectorStatusPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  55% {
+    transform: scale(2.15);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes sectorStatusBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.5px);
+  }
+}
+
+.animate-sector-status-ring {
+  animation: sectorStatusPulse 2.4s ease-out infinite;
+}
+
+.animate-sector-status-dot {
+  animation: sectorStatusBob 2.4s ease-in-out infinite;
+}
+
+@keyframes sectorPieFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes sectorLegendIn {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes sectorBarGrow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes sectorMsgIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes sectorTotalPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  70% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-sector-pie-float {
+  animation: sectorPieFloat 4.5s ease-in-out infinite;
+}
+
+.animate-sector-legend-in {
+  opacity: 0;
+  animation: sectorLegendIn 0.55s ease-out forwards;
+}
+
+.animate-sector-bar-grow {
+  transform-origin: left center;
+  animation: sectorBarGrow 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-sector-msg-in {
+  animation: sectorMsgIn 0.35s ease-out forwards;
+}
+
+.animate-sector-total-pop {
+  animation: sectorTotalPop 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+}
+
+@keyframes ratesDataRefresh {
+  0% {
+    opacity: 0.15;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ratesChartRefresh {
+  0% {
+    border-color: rgba(16, 185, 129, 0.35);
+    box-shadow: inset 0 0 0 0 rgba(16, 185, 129, 0.08);
+  }
+  35% {
+    border-color: rgba(16, 185, 129, 0.95);
+    box-shadow: inset 0 0 18px rgba(16, 185, 129, 0.12);
+  }
+  100% {
+    border-color: rgba(110, 231, 183, 0.7);
+    box-shadow: inset 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.rates-refresh-chart {
+  animation: ratesChartRefresh 1.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.rates-trend-chart-line-active .recharts-area-area {
+  transition: opacity 0.25s ease-out;
+}
+
+@keyframes ratesStatsRefresh {
+  0% {
+    opacity: 0.3;
+    transform: translateY(8px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ratesBadgePop {
+  0% {
+    transform: scale(0.92);
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.rates-refresh-row {
+  animation: ratesDataRefresh 1.25s ease-in-out both;
+}
+
+.rates-refresh-stats {
+  animation: ratesStatsRefresh 1.1s ease-in-out both;
+}
+
+.rates-refresh-stat {
+  animation: ratesStatsRefresh 1.15s ease-in-out both;
+}
+
+.rates-refresh-badge {
+  animation: ratesBadgePop 1s ease-in-out both;
+}
+
+.rates-trend-chart .recharts-wrapper,
+.rates-trend-chart .recharts-responsive-container,
+.rates-trend-chart .recharts-responsive-container > div {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.rates-trend-chart .recharts-wrapper:focus,
+.rates-trend-chart .recharts-wrapper:focus-visible {
+  outline: none !important;
+  border: none !important;
+}
+
+.rates-trend-chart .recharts-surface {
+  overflow: visible;
+  border: none !important;
+  outline: none !important;
+}
+
+.rates-trend-chart svg {
+  border: none !important;
+  outline: none !important;
+  overflow: visible;
+}
+
+.rates-trend-chart .recharts-cartesian-grid-vertical line {
+  display: none;
+}
+
+.rates-trend-chart .recharts-tooltip-cursor,
+.rates-trend-chart .recharts-cursor {
+  display: none !important;
+}
+
+.rates-print-chart .recharts-wrapper,
+.rates-print-chart .recharts-responsive-container,
+.rates-print-chart .recharts-responsive-container > div,
+.rates-print-chart svg {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.rates-print-chart .recharts-cartesian-grid-horizontal line {
+  stroke: #bbf7d0;
+}
+
+@keyframes iconBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-icon-bounce { animation: iconBounce 2.2s ease-in-out infinite; }
+
+@keyframes waveHand {
+  0% {
+    transform: rotate(0deg);
+  }
+  12% {
+    transform: rotate(18deg);
+  }
+  24% {
+    transform: rotate(-12deg);
+  }
+  36% {
+    transform: rotate(18deg);
+  }
+  48% {
+    transform: rotate(-6deg);
+  }
+  60% {
+    transform: rotate(10deg);
+  }
+  72% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.super-admin-shell .sa-wave-hand,
+.company-admin-shell .animate-wave-hand,
+.animate-wave-hand {
+  display: inline-block !important;
+  transform-origin: 75% 80% !important;
+  animation: waveHand 1.6s ease-in-out infinite !important;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .super-admin-shell .sa-wave-hand,
+  .company-admin-shell .animate-wave-hand,
+  .animate-wave-hand {
+    animation: waveHand 1.6s ease-in-out infinite !important;
+  }
+}
+
+@keyframes heroStatBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-hero-stat-bounce {
+  opacity: 0;
+  animation:
+    fadeInUp 0.6s ease-out forwards,
+    heroStatBounce 2.8s ease-in-out infinite;
+  animation-delay:
+    var(--hero-stat-enter-delay, 0s),
+    calc(var(--hero-stat-enter-delay, 0s) + 0.65s + var(--hero-stat-bounce-delay, 0s));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-stat-bounce {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, #fff 0%, #a7f3d0 50%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #10b98140, transparent);
+}
+
+.scrollbar-none::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Super Admin console — hand cursor everywhere (sidebar + pages + portal menus) */
+.super-admin-shell,
+.super-admin-shell *,
+body.super-admin-active,
+body.super-admin-active * {
+  cursor: pointer !important;
+}
+
+.super-admin-shell :is(
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input:not([type]),
+  textarea
+),
+body.super-admin-active :is(
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input:not([type]),
+  textarea
+) {
+  cursor: text !important;
+}
+
+.super-admin-shell :is(button, a, [role="button"], select, input):disabled,
+.super-admin-shell button[disabled],
+.super-admin-shell select[disabled],
+.super-admin-shell input[disabled],
+body.super-admin-active :is(button, a, [role="button"], select, input):disabled,
+body.super-admin-active button[disabled] {
+  cursor: not-allowed !important;
+}
+
+.super-admin-shell tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.super-admin-shell tbody tr:hover {
+  background-color: #f1f5f9 !important; /* slate-100 — neutral, not green */
+}
+
+.super-admin-shell tbody tr:hover > td {
+  background-color: transparent;
+}
+
+.super-admin-shell button:not(:disabled):hover,
+.super-admin-shell a:hover,
+.super-admin-shell [role="button"]:hover,
+.super-admin-shell [role="menuitem"]:hover,
+body.super-admin-active [role="menuitem"]:hover {
+  filter: brightness(0.96);
+}
+
+/* Row action icons — no brightness jump / layout shift on hover */
+.super-admin-shell button.sa-row-action,
+.super-admin-shell button.sa-row-action:hover,
+.super-admin-shell button.sa-row-action:focus,
+.super-admin-shell button.sa-row-action:active {
+  filter: none !important;
+  transform: none !important;
+}
+
+/* Keep filter/select boxes original white (no mint fill) */
+.super-admin-shell select,
+.super-admin-shell select:hover,
+.super-admin-shell select:focus,
+.super-admin-shell select:active {
+  background-color: #ffffff !important;
+  filter: none !important;
+}
+
+.livestock-section,
+.admin-section,
+.electricity-section,
+.water-section {
+  scroll-margin-top: 9.5rem;
+}
+
+@media (max-width: 640px) {
+  .livestock-section,
+  .admin-section,
+  .electricity-section,
+  .water-section {
+    scroll-margin-top: 5.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .livestock-section,
+  .admin-section,
+  .electricity-section,
+  .water-section {
+    scroll-margin-top: 4.25rem;
+  }
+}
+
+@media print {
+  @page {
+    margin: 0.45cm;
+    size: A4 portrait;
+  }
+
+  html.electricity-rates-printing,
+  html.electricity-rates-printing body {
+    width: 100% !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: white !important;
+  }
+
+  html.electricity-rates-printing body * {
+    visibility: hidden !important;
+  }
+
+  html.electricity-rates-printing #electricity-rates-history {
+    visibility: visible !important;
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 28.5cm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    z-index: 2147483647 !important;
+    background: white !important;
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-before: avoid-page !important;
+    break-after: avoid-page !important;
+  }
+
+  html.electricity-rates-printing #electricity-rates-history * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html.electricity-rates-printing #electricity-rates-history .print\:hidden,
+  html.electricity-rates-printing #electricity-rates-history [class*="print:hidden"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  html.electricity-rates-printing .electricity-rates-report {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-height: 28.5cm !important;
+    border: 2px solid #047857 !important;
+    border-radius: 1rem !important;
+    padding: 0.85rem 1rem !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid-page !important;
+  }
+
+  html.electricity-rates-printing .electricity-rates-report .rates-print-chart {
+    width: 100% !important;
+    min-height: 120px !important;
+  }
+
+  html.electricity-rates-printing .electricity-rates-report .rates-print-chart .recharts-tooltip-wrapper,
+  html.electricity-rates-printing .electricity-rates-report .rates-print-chart .recharts-default-tooltip,
+  html.electricity-rates-printing .electricity-rates-report .rates-print-chart .recharts-cursor,
+  html.electricity-rates-printing .electricity-rates-report .rates-print-chart .recharts-active-dot {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  html.electricity-rates-printing .electricity-rates-report .rates-print-chart svg {
+    width: auto !important;
+    max-width: 100% !important;
+    height: 120px !important;
+    margin-inline: auto;
+    display: block;
+  }
+
+  html.electricity-rates-printing .electricity-rates-report .rates-print-chart .recharts-responsive-container {
+    height: 120px !important;
+  }
+
+  html.electricity-rates-printing .electricity-rates-report table {
+    font-size: 10px;
+  }
+
+  html.electricity-rates-printing .electricity-rates-report table th,
+  html.electricity-rates-printing .electricity-rates-report table td {
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+
+  html.water-rates-printing,
+  html.water-rates-printing body {
+    width: 100% !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: white !important;
+  }
+
+  html.water-rates-printing body * {
+    visibility: hidden !important;
+  }
+
+  html.water-rates-printing #water-rates-history {
+    visibility: visible !important;
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 28.5cm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    z-index: 2147483647 !important;
+    background: white !important;
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-before: avoid-page !important;
+    break-after: avoid-page !important;
+  }
+
+  html.water-rates-printing #water-rates-history * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html.water-rates-printing #water-rates-history .print\:hidden,
+  html.water-rates-printing #water-rates-history [class*="print:hidden"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  html.water-rates-printing .water-rates-report {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-height: 28.5cm !important;
+    border: 2px solid #047857 !important;
+    border-radius: 1rem !important;
+    padding: 0.85rem 1rem !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid-page !important;
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    z-index: auto !important;
+    pointer-events: auto !important;
+  }
+
+  html.water-rates-printing .water-rates-report .rates-print-chart {
+    min-height: 120px !important;
+  }
+
+  html.water-rates-printing .water-rates-report .rates-print-chart .recharts-tooltip-wrapper,
+  html.water-rates-printing .water-rates-report .rates-print-chart .recharts-default-tooltip,
+  html.water-rates-printing .water-rates-report .rates-print-chart .recharts-cursor,
+  html.water-rates-printing .water-rates-report .rates-print-chart .recharts-active-dot {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  html.water-rates-printing .water-rates-report .rates-print-chart svg {
+    width: auto !important;
+    max-width: 100% !important;
+    height: 120px !important;
+    margin-inline: auto;
+    display: block;
+  }
+
+  html.water-rates-printing .water-rates-report .rates-print-chart .recharts-responsive-container {
+    height: 120px !important;
+  }
+
+  html.water-rates-printing .water-rates-report table {
+    font-size: 10px;
+  }
+
+  html.water-rates-printing .water-rates-report table th,
+  html.water-rates-printing .water-rates-report table td {
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+}
+
+/* ─── Custom Animations ──────────────────────────────────────────────────────── */
+
+/* Entry: fade + slide up */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Entry: pop-bounce for buttons */
+@keyframes pop-in {
+  0%   { opacity: 0; transform: scale(0.7) translateY(20px); }
+  60%  { opacity: 1; transform: scale(1.08) translateY(-4px); }
+  80%  { transform: scale(0.96) translateY(2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Continuous gentle float */
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+
+/* Live pulse dot */
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(1.2); }
+}
+
+/* Shimmer sweep */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-pop-in {
+  animation: pop-in 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-float {
+  animation: float-gentle 3s ease-in-out infinite;
+}
+
+.animate-pulse-live {
+  animation: pulse-live 2s ease-in-out infinite;
+}
+
+/* Water / electricity rate KPI cards — hover matches Super Admin KpiCard */
+.rate-stat-card--primary {
+  background-image: linear-gradient(
+    180deg,
+    rgb(236 253 245) 0%,
+    rgb(209 250 229 / 0.55) 100%
+  );
+}
+
+.rate-stat-card--secondary {
+  background-image: linear-gradient(
+    135deg,
+    rgb(240 249 255) 0%,
+    rgb(224 242 254) 45%,
+    rgb(207 250 254) 100%
+  );
+  border-color: rgb(103 232 249) !important;
+  box-shadow:
+    0 1px 2px rgba(14, 165, 233, 0.08),
+    inset 0 0 0 1px rgba(34, 211, 238, 0.25);
+}
+
+.rate-stat-card--secondary .rate-stat-card__icon {
+  background-image: linear-gradient(135deg, #0284c7, #06b6d4);
+}
+
+.rate-stat-card {
+  transform: translateZ(0);
+  transition:
+    transform 300ms ease,
+    box-shadow 300ms ease,
+    border-color 300ms ease;
+}
+
+.rate-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: none;
+  z-index: 1;
+}
+
+.rate-stat-card .rate-stat-card__icon {
+  transition: transform 300ms ease;
+}
+
+.rate-stat-card:hover .rate-stat-card__icon {
+  transform: scale(1.15);
+}
+
+@keyframes rateHistoryIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rate-history-in {
+  animation: rateHistoryIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rate-history-row--alt {
+  background-color: rgb(240 249 255 / 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rate-history-in {
+    animation: none !important;
+  }
+
+  .rate-stat-card,
+  .rate-stat-card:hover,
+  .rate-stat-card .rate-stat-card__icon,
+  .rate-stat-card:hover .rate-stat-card__icon {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* Sector button: pop in then float */
+.sector-btn {
+  animation: pop-in 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+             float-gentle 3.5s ease-in-out infinite;
+  animation-delay: var(--btn-delay, 0ms), calc(var(--btn-delay, 0ms) + 0.7s);
+}
+
+.sector-btn:hover {
+  animation-play-state: running, paused;
+}
+
+@media print {
+  html.livestock-report-printing,
+  html.livestock-report-printing body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  html.livestock-report-printing body * {
+    visibility: hidden !important;
+  }
+
+  html.livestock-report-printing #livestock-price-report {
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+  }
+
+  html.livestock-report-printing #livestock-price-report * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html.livestock-report-printing #livestock-price-report .print\:hidden,
+  html.livestock-report-printing #livestock-price-report [class*="print:hidden"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  html.livestock-report-printing .livestock-print-letterhead {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  html.livestock-report-printing .livestock-price-report-sheet {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 2px solid #047857 !important;
+    border-radius: 0.75rem !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  html.livestock-report-printing .mmps-table-fit {
+    min-height: 0 !important;
+    overflow: visible !important;
+    max-width: 100% !important;
+  }
+
+  html.livestock-report-printing table {
+    table-layout: auto !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    font-size: 11px !important;
+    border-collapse: collapse !important;
+  }
+
+  html.livestock-report-printing colgroup {
+    display: none !important;
+  }
+
+  html.livestock-report-printing th,
+  html.livestock-report-printing td {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+    padding: 0.45rem 0.4rem !important;
+    vertical-align: top !important;
+  }
+
+  html.livestock-report-printing th {
+    white-space: nowrap !important;
+  }
+
+  html.livestock-report-printing p,
+  html.livestock-report-printing span {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: none !important;
+  }
+
+  html.livestock-report-printing .truncate {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+  }
+}
+
+/* —— Responsive UI (phones, tablets, desktops) —— */
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+.mmps-table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.mmps-table-fit {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+.super-admin-shell main :has(> table):not(.mmps-table-fit),
+.company-admin-shell main :has(> table):not(.mmps-table-fit) {
+  max-width: 100%;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.super-admin-shell main .mmps-table-fit,
+.company-admin-shell main .mmps-table-fit {
+  overflow-x: hidden !important;
+}
+
+@media (max-width: 1023px) {
+  .super-admin-shell main table.table-fixed,
+  .company-admin-shell main table.table-fixed {
+    table-layout: auto !important;
+    width: max-content !important;
+    min-width: 100%;
+  }
+
+  .super-admin-shell main .mmps-table-fit table.table-fixed,
+  .company-admin-shell main .mmps-table-fit table.table-fixed {
+    table-layout: fixed !important;
+    width: 100% !important;
+    min-width: 0;
+  }
+
+  .admin-save-btn {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  /* Search + dropdowns were forced onto one overlapping row */
+  .super-admin-shell .flex.w-full.flex-nowrap.items-center.gap-2,
+  .company-admin-shell .flex.w-full.flex-nowrap.items-center.gap-2 {
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+    align-items: stretch !important;
+  }
+
+  .super-admin-shell .flex.w-full.flex-nowrap.items-center.gap-2 > .relative,
+  .company-admin-shell .flex.w-full.flex-nowrap.items-center.gap-2 > .relative {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .super-admin-shell header.sticky,
+  .company-admin-shell header.sticky {
+    height: auto !important;
+    min-height: 3.5rem;
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+    padding-bottom: 0.5rem;
+  }
+
+  .super-admin-shell footer,
+  .company-admin-shell footer {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+

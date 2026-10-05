@@ -1,0 +1,791 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PUBLIC
+  REGISTERED
+  SUPER_ADMIN
+  COMPANY_ADMIN
+  LIVESTOCK_BROKER_USER
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum PriceStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ApprovalAction {
+  APPROVE
+  REJECT
+}
+
+enum AnimalType {
+  HAL
+  AWAR
+  QURBAC
+  CAMEL
+  CATTLE
+  GOAT
+  SHEEP
+  POULTRY
+}
+
+enum WaterType {
+  TANKER
+  HOUSEHOLD
+  COMMERCIAL
+  SERVICE_PROVIDER
+}
+
+enum ElectricityType {
+  RESIDENTIAL
+  COMMERCIAL
+  UNIT_KWH
+  SERVICE_PROVIDER
+}
+
+enum ReportType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
+enum MarketType {
+  WATER
+  ELECTRICITY
+  LIVESTOCK
+  GENERAL
+}
+
+enum CompanyType {
+  WATER_SUPPLY
+  ELECTRICITY
+  OTHER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRING_SOON
+  EXPIRED
+  CANCELLED
+}
+
+enum NotificationType {
+  PRICE_SUBMITTED
+  PRICE_APPROVED
+  PRICE_REJECTED
+  SUBSCRIPTION_ACTIVATED
+  SUBSCRIPTION_EXPIRING
+  SUBSCRIPTION_EXPIRED
+  USER_CREATED
+  SYSTEM_ANNOUNCEMENT
+  GENERAL
+}
+
+model User {
+  id                        Int              @id @default(autoincrement())
+  fullName                  String           @map("full_name")
+  email                     String           @unique
+  password                  String
+  /// AES-encrypted plaintext of registration password for Super Admin review only
+  registrationPasswordEnc   String?          @map("registration_password_enc") @db.Text
+  phone                     String?
+  profilePicture            String?          @map("profile_picture")
+  companyName               String?          @map("company_name")
+  companySector             String?          @map("company_sector")
+  companyLocation           String?          @map("company_location")
+  companyType               String?          @map("company_type")
+  companyEstablishedDate    String?          @map("company_established_date")
+  companyCountry            String?          @map("company_country")
+  companyDistrict           String?          @map("company_district")
+  companyAddress            String?          @map("company_address") @db.Text
+  companyLogoFileName       String?          @map("company_logo_file_name")
+  companyRegistrationNumber String?          @map("company_registration_number")
+  companyEmail              String?          @map("company_email")
+  companySlug               String?          @unique @map("company_slug")
+  contactRole               String?          @map("contact_role")
+  documentFileName          String?          @map("document_file_name")
+  registrationDocuments     String?          @map("registration_documents") @db.Text
+  /// JSON map: documentId → { status, reason?, reviewedAt?, reviewedById? }
+  registrationDocumentReviews String?        @map("registration_document_reviews") @db.Text
+  documentsReviewedAt       DateTime?        @map("documents_reviewed_at") @db.Timestamptz(3)
+  rejectionReason           String?          @map("rejection_reason") @db.Text
+  rejectedAt                DateTime?        @map("rejected_at") @db.Timestamptz(3)
+  rejectedById              Int?             @map("rejected_by_id")
+  rejectedBy                User?            @relation("RegistrationRejectedBy", fields: [rejectedById], references: [id], onDelete: SetNull)
+  registrationsRejected     User[]           @relation("RegistrationRejectedBy")
+  role                      Role             @default(REGISTERED)
+  status                    UserStatus       @default(PENDING)
+  accountStatus             AccountStatus    @default(ACTIVE) @map("account_status")
+  companyId                 Int?             @map("company_id")
+  company                   Company?         @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  brokerId                  Int?             @map("broker_id")
+  broker                    LivestockBroker? @relation(fields: [brokerId], references: [id], onDelete: SetNull)
+  marketId                  Int?             @map("market_id")
+  market                    Market?          @relation(fields: [marketId], references: [id], onDelete: SetNull)
+  deletedAt                 DateTime?        @map("deleted_at")
+  createdAt                 DateTime         @default(now()) @map("created_at")
+  updatedAt                 DateTime         @default(now()) @updatedAt @map("updated_at")
+
+  livestockPrices   LivestockPrice[]   @relation("UpdatedBy")
+  waterPrices       WaterPrice[]       @relation("UpdatedBy")
+  electricityPrices ElectricityPrice[] @relation("UpdatedBy")
+  marketPrices      MarketPrice[]      @relation("UpdatedBy")
+
+  approvedLivestockPrices   LivestockPrice[]   @relation("ApprovedBy")
+  rejectedLivestockPrices   LivestockPrice[]   @relation("RejectedBy")
+  approvedWaterPrices       WaterPrice[]       @relation("ApprovedBy")
+  rejectedWaterPrices       WaterPrice[]       @relation("RejectedBy")
+  approvedElectricityPrices ElectricityPrice[] @relation("ApprovedBy")
+  rejectedElectricityPrices ElectricityPrice[] @relation("RejectedBy")
+  approvedMarketPrices      MarketPrice[]      @relation("ApprovedBy")
+  rejectedMarketPrices      MarketPrice[]      @relation("RejectedBy")
+
+  priceApprovals      PriceApproval[]
+  uploadedDocuments   CompanyDocument[]    @relation("DocumentUploader")
+  reports             Report[]
+  favorites           Favorite[]
+  notifications       Notification[]
+  verificationCode    VerificationCode?
+  sentNotifications   Notification[]       @relation("NotificationSender")
+  adminSessions       AdminSession[]
+  passwordResetTokens PasswordResetToken[]
+  registrationMessages RegistrationMessage[] @relation("MessageThread")
+  sentRegistrationMessages RegistrationMessage[] @relation("MessageSender")
+  rejectionReasonChanges RegistrationRejectionHistory[] @relation("RejectionSubject")
+  rejectionReasonsChangedBy RegistrationRejectionHistory[] @relation("RejectionReasonChangedBy")
+  registrationTimelineEvents RegistrationTimelineEvent[]
+
+  @@index([companyId])
+  @@index([brokerId])
+  @@index([marketId])
+  @@index([role, status])
+  @@index([rejectedById])
+  @@map("users")
+}
+
+model RegistrationRejectionHistory {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @map("user_id")
+  user           User     @relation("RejectionSubject", fields: [userId], references: [id], onDelete: Cascade)
+  previousReason String?  @map("previous_reason") @db.Text
+  newReason      String   @map("new_reason") @db.Text
+  changedById    Int      @map("changed_by_id")
+  changedBy      User     @relation("RejectionReasonChangedBy", fields: [changedById], references: [id], onDelete: Restrict)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([userId])
+  @@map("registration_rejection_history")
+}
+
+model RegistrationTimelineEvent {
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @map("user_id")
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventType          String   @map("event_type")
+  title              String
+  detail             String?  @db.Text
+  statusLabel        String?  @map("status_label")
+  actorId            Int?     @map("actor_id")
+  actorLabel         String?  @map("actor_label")
+  visibleToApplicant Boolean  @default(true) @map("visible_to_applicant")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([userId, createdAt])
+  @@map("registration_timeline_events")
+}
+
+model VerificationCode {
+  id          Int       @id @default(autoincrement())
+  userId      Int       @unique @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code        String    @unique
+  verified    Boolean   @default(false)
+  verifiedAt  DateTime? @map("verified_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  expiresAt   DateTime  @map("expires_at")
+  attempts    Int       @default(0)
+  lockedUntil DateTime? @map("locked_until")
+
+  @@map("verification_codes")
+}
+
+model Company {
+  id                 Int           @id @default(autoincrement())
+  name               String
+  slug               String        @unique
+  type               CompanyType   @default(OTHER)
+  email              String?
+  phone              String?
+  location           String?
+  district           String?
+  address            String?       @db.Text
+  registrationNumber String?       @map("registration_number")
+  logoFileName       String?       @map("logo_file_name")
+  description        String?       @db.Text
+  status             AccountStatus @default(ACTIVE)
+  marketId           Int?          @map("market_id")
+  market             Market?       @relation(fields: [marketId], references: [id], onDelete: SetNull)
+  deletedAt          DateTime?     @map("deleted_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  users         User[]
+  documents     CompanyDocument[]
+  marketPrices  MarketPrice[]
+  subscriptions Subscription[]
+  sections      MarketSection[]   @relation("CompanySections")
+  profileData   Json?             @map("profile_data")
+
+  @@index([status])
+  @@index([type])
+  @@map("companies")
+}
+
+model CompanyDocument {
+  id           Int       @id @default(autoincrement())
+  companyId    Int       @map("company_id")
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fileName     String    @map("file_name")
+  originalName String    @map("original_name")
+  mimeType     String    @map("mime_type")
+  sizeBytes    Int       @map("size_bytes")
+  uploadedById Int?      @map("uploaded_by")
+  uploadedBy   User?     @relation("DocumentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([companyId])
+  @@map("company_documents")
+}
+
+model LivestockBroker {
+  id             Int           @id @default(autoincrement())
+  name           String
+  email          String?       @unique
+  phone          String?
+  location       String?
+  heroTitle      String?       @map("hero_title")
+  profilePicture String?       @map("profile_picture")
+  description    String?       @db.Text
+  livestockFocus String?       @map("livestock_focus")
+  /// Public broker identifier, e.g. LB-00012
+  code           String?       @unique @map("broker_code")
+  approvalStatus UserStatus    @default(APPROVED) @map("approval_status")
+  status         AccountStatus @default(ACTIVE)
+  marketId       Int?          @map("market_id")
+  market         Market?       @relation(fields: [marketId], references: [id], onDelete: SetNull)
+  deletedAt      DateTime?     @map("deleted_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  users                User[]
+  livestockPrices      LivestockPrice[]
+  subscriptions        Subscription[]
+  assignedMarkets      LivestockBrokerMarket[]
+  authorizedCategories LivestockBrokerCategory[]
+  authorizedTypes      LivestockBrokerAnimalType[]
+
+  @@index([status])
+  @@index([approvalStatus])
+  @@map("livestock_brokers")
+}
+
+model LivestockCategory {
+  id          Int           @id @default(autoincrement())
+  slug        String        @unique
+  name        String
+  nameSomali  String?       @map("name_somali")
+  description String?       @db.Text
+  imageUrl    String?       @map("image_url")
+  /// Legacy species used on LivestockPrice.animalType
+  species     AnimalType
+  status      AccountStatus @default(ACTIVE)
+  sortOrder   Int           @default(0) @map("sort_order")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  animalTypes LivestockAnimalType[]
+  brokers     LivestockBrokerCategory[]
+  markets     LivestockMarketCategory[]
+  prices      LivestockPrice[]
+
+  @@index([status, sortOrder])
+  @@map("livestock_categories")
+}
+
+model LivestockAnimalType {
+  id               Int           @id @default(autoincrement())
+  categoryId       Int           @map("category_id")
+  category         LivestockCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  slug             String
+  name             String
+  nameSomali       String?       @map("name_somali")
+  description      String?       @db.Text
+  imageUrl         String?       @map("image_url")
+  unit             String?       @default("head")
+  legacyAnimalType AnimalType    @map("legacy_animal_type")
+  status           AccountStatus @default(ACTIVE)
+  sortOrder        Int           @default(0) @map("sort_order")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  brokers LivestockBrokerAnimalType[]
+  prices  LivestockPrice[]
+
+  @@unique([categoryId, slug])
+  @@index([categoryId, status, sortOrder])
+  @@map("livestock_animal_types")
+}
+
+model LivestockBrokerMarket {
+  brokerId  Int             @map("broker_id")
+  broker    LivestockBroker @relation(fields: [brokerId], references: [id], onDelete: Cascade)
+  marketId  Int             @map("market_id")
+  market    Market          @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  @@id([brokerId, marketId])
+  @@index([marketId])
+  @@map("livestock_broker_markets")
+}
+
+model LivestockBrokerCategory {
+  brokerId   Int                @map("broker_id")
+  broker     LivestockBroker    @relation(fields: [brokerId], references: [id], onDelete: Cascade)
+  categoryId Int                @map("category_id")
+  category   LivestockCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime           @default(now()) @map("created_at")
+
+  @@id([brokerId, categoryId])
+  @@index([categoryId])
+  @@map("livestock_broker_categories")
+}
+
+model LivestockBrokerAnimalType {
+  brokerId     Int                 @map("broker_id")
+  broker       LivestockBroker     @relation(fields: [brokerId], references: [id], onDelete: Cascade)
+  animalTypeId Int                 @map("animal_type_id")
+  animalType   LivestockAnimalType @relation(fields: [animalTypeId], references: [id], onDelete: Cascade)
+  createdAt    DateTime            @default(now()) @map("created_at")
+
+  @@id([brokerId, animalTypeId])
+  @@index([animalTypeId])
+  @@map("livestock_broker_animal_types")
+}
+
+model LivestockMarketCategory {
+  marketId   Int               @map("market_id")
+  market     Market            @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  categoryId Int               @map("category_id")
+  category   LivestockCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime          @default(now()) @map("created_at")
+
+  @@id([marketId, categoryId])
+  @@index([categoryId])
+  @@map("livestock_market_categories")
+}
+
+model Market {
+  id          Int           @id @default(autoincrement())
+  name        String
+  location    String?
+  marketType  MarketType    @default(GENERAL) @map("market_type")
+  description String?       @db.Text
+  logoFileName String?      @map("logo_file_name")
+  code        String?       @unique
+  status      AccountStatus @default(ACTIVE)
+  deletedAt   DateTime?     @map("deleted_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  sections              MarketSection[]
+  companies             Company[]
+  brokers               LivestockBroker[]
+  registrants           User[]
+  marketPrices          MarketPrice[]
+  livestockPrices       LivestockPrice[]
+  livestockCategories   LivestockMarketCategory[]
+  livestockBrokerLinks  LivestockBrokerMarket[]
+
+  @@index([marketType, status])
+  @@map("markets")
+}
+
+model MarketSection {
+  id          Int           @id @default(autoincrement())
+  marketId    Int           @map("market_id")
+  market      Market        @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  name        String
+  description String?       @db.Text
+  status      AccountStatus @default(ACTIVE)
+  deletedAt   DateTime?     @map("deleted_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  companies    Company[]     @relation("CompanySections")
+  marketPrices MarketPrice[]
+
+  @@unique([marketId, name])
+  @@index([marketId])
+  @@map("market_sections")
+}
+
+model MarketPrice {
+  id              Int            @id @default(autoincrement())
+  companyId       Int?           @map("company_id")
+  company         Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  marketId        Int?           @map("market_id")
+  market          Market?        @relation(fields: [marketId], references: [id], onDelete: SetNull)
+  sectionId       Int?           @map("section_id")
+  section         MarketSection? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  productService  String         @map("product_service")
+  price           Decimal        @db.Decimal(12, 2)
+  currency        String         @default("USD")
+  unit            String?
+  kilowatt        Decimal?       @db.Decimal(12, 4)
+  meterCubic      Decimal?       @map("meter_cubic") @db.Decimal(12, 4)
+  effectiveDate   DateTime       @default(now()) @map("effective_date")
+  description     String?        @db.Text
+  status          PriceStatus    @default(PENDING)
+  rejectionReason String?        @map("rejection_reason") @db.Text
+  updatedById     Int            @map("updated_by")
+  updatedBy       User           @relation("UpdatedBy", fields: [updatedById], references: [id])
+  approvedById    Int?           @map("approved_by")
+  approvedBy      User?          @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedAt      DateTime?      @map("approved_at")
+  rejectedById    Int?           @map("rejected_by")
+  rejectedBy      User?          @relation("RejectedBy", fields: [rejectedById], references: [id])
+  rejectedAt      DateTime?      @map("rejected_at")
+  deletedAt       DateTime?      @map("deleted_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  approvals PriceApproval[]
+
+  @@index([status, effectiveDate])
+  @@index([companyId])
+  @@map("market_prices")
+}
+
+model LivestockPrice {
+  id             Int              @id @default(autoincrement())
+  animalType     AnimalType       @map("animal_type")
+  category       String?
+  livestockCategoryId Int?        @map("livestock_category_id")
+  livestockCategory   LivestockCategory? @relation(fields: [livestockCategoryId], references: [id], onDelete: SetNull)
+  livestockTypeId     Int?        @map("livestock_type_id")
+  livestockType       LivestockAnimalType? @relation(fields: [livestockTypeId], references: [id], onDelete: SetNull)
+  marketLocation String           @map("market_location")
+  marketId       Int?             @map("market_id")
+  market         Market?          @relation(fields: [marketId], references: [id], onDelete: SetNull)
+  brokerId       Int?             @map("broker_id")
+  broker         LivestockBroker? @relation(fields: [brokerId], references: [id], onDelete: SetNull)
+  price          Decimal          @db.Decimal(12, 2)
+  currency       String           @default("USD")
+  unit           String?
+  description    String?          @db.Text
+  dateRecorded   DateTime         @default(now()) @map("date_recorded")
+  updatedById    Int              @map("updated_by")
+  updatedBy      User             @relation("UpdatedBy", fields: [updatedById], references: [id])
+
+  status          PriceStatus @default(PENDING)
+  rejectionReason String?     @map("rejection_reason") @db.Text
+  approvedById    Int?        @map("approved_by")
+  approvedBy      User?       @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedAt      DateTime?   @map("approved_at")
+  rejectedById    Int?        @map("rejected_by")
+  rejectedBy      User?       @relation("RejectedBy", fields: [rejectedById], references: [id])
+  rejectedAt      DateTime?   @map("rejected_at")
+  deletedAt       DateTime?   @map("deleted_at")
+  ageClass        String?     @map("age_class")
+  originPlace     String?     @map("origin_place")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  approvals PriceApproval[]
+
+  @@index([animalType, marketLocation])
+  @@index([dateRecorded])
+  @@index([brokerId])
+  @@index([status])
+  @@index([livestockCategoryId])
+  @@index([livestockTypeId])
+  @@index([marketId])
+  @@map("livestock_prices")
+}
+
+model PriceApproval {
+  id                 Int               @id @default(autoincrement())
+  action             ApprovalAction
+  comment            String?           @db.Text
+  reviewedById       Int               @map("reviewed_by")
+  reviewedBy         User              @relation(fields: [reviewedById], references: [id])
+  marketPriceId      Int?              @map("market_price_id")
+  marketPrice        MarketPrice?      @relation(fields: [marketPriceId], references: [id], onDelete: Cascade)
+  livestockPriceId   Int?              @map("livestock_price_id")
+  livestockPrice     LivestockPrice?   @relation(fields: [livestockPriceId], references: [id], onDelete: Cascade)
+  waterPriceId       Int?              @map("water_price_id")
+  waterPrice         WaterPrice?       @relation(fields: [waterPriceId], references: [id], onDelete: Cascade)
+  electricityPriceId Int?              @map("electricity_price_id")
+  electricityPrice   ElectricityPrice? @relation(fields: [electricityPriceId], references: [id], onDelete: Cascade)
+  createdAt          DateTime          @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("price_approvals")
+}
+
+model WaterPrice {
+  id           Int       @id @default(autoincrement())
+  providerName String    @map("provider_name")
+  waterType    WaterType @map("water_type")
+  location     String
+  pricePerUnit Decimal   @map("price_per_unit") @db.Decimal(12, 2)
+  dateRecorded DateTime  @default(now()) @map("date_recorded")
+  updatedById  Int       @map("updated_by")
+  updatedBy    User      @relation("UpdatedBy", fields: [updatedById], references: [id])
+
+  status          PriceStatus @default(PENDING)
+  rejectionReason String?     @map("rejection_reason") @db.Text
+  approvedById    Int?        @map("approved_by")
+  approvedBy      User?       @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedAt      DateTime?   @map("approved_at")
+  rejectedById    Int?        @map("rejected_by")
+  rejectedBy      User?       @relation("RejectedBy", fields: [rejectedById], references: [id])
+  rejectedAt      DateTime?   @map("rejected_at")
+
+  approvals PriceApproval[]
+
+  @@index([location])
+  @@index([dateRecorded])
+  @@map("water_prices")
+}
+
+model ElectricityPrice {
+  id           Int             @id @default(autoincrement())
+  providerName String          @map("provider_name")
+  serviceType  ElectricityType @map("service_type")
+  location     String
+  pricePerKwh  Decimal         @map("price_per_kwh") @db.Decimal(12, 2)
+  dateRecorded DateTime        @default(now()) @map("date_recorded")
+  updatedById  Int             @map("updated_by")
+  updatedBy    User            @relation("UpdatedBy", fields: [updatedById], references: [id])
+
+  status          PriceStatus @default(PENDING)
+  rejectionReason String?     @map("rejection_reason") @db.Text
+  approvedById    Int?        @map("approved_by")
+  approvedBy      User?       @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedAt      DateTime?   @map("approved_at")
+  rejectedById    Int?        @map("rejected_by")
+  rejectedBy      User?       @relation("RejectedBy", fields: [rejectedById], references: [id])
+  rejectedAt      DateTime?   @map("rejected_at")
+
+  approvals PriceApproval[]
+
+  @@index([location])
+  @@index([dateRecorded])
+  @@map("electricity_prices")
+}
+
+model SubscriptionPlan {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  description        String?  @db.Text
+  price              Decimal  @db.Decimal(12, 2)
+  durationDays       Int      @map("duration_days")
+  accountType        String   @map("account_type")
+  /// Livestock brokers: max markets they may manage. null = all markets.
+  maxMarkets         Int?     @map("max_markets")
+  /// Livestock brokers: max livestock categories (e.g. camel, goat). null = all types.
+  maxLivestockTypes  Int?     @map("max_livestock_types")
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id         Int                @id @default(autoincrement())
+  planId     Int                @map("plan_id")
+  plan       SubscriptionPlan   @relation(fields: [planId], references: [id])
+  companyId  Int?               @map("company_id")
+  company    Company?           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  brokerId   Int?               @map("broker_id")
+  broker     LivestockBroker?   @relation(fields: [brokerId], references: [id], onDelete: Cascade)
+  startDate  DateTime           @map("start_date")
+  expiryDate DateTime           @map("expiry_date")
+  paidMonths Int?               @map("paid_months")
+  paidAmount Decimal?           @map("paid_amount") @db.Decimal(12, 2)
+  status     SubscriptionStatus @default(ACTIVE)
+  adsRemaining Int?             @map("ads_remaining")
+  createdAt  DateTime           @default(now()) @map("created_at")
+  updatedAt  DateTime           @updatedAt @map("updated_at")
+
+  paymentProofs SubscriptionPaymentProof[]
+
+  @@index([status, expiryDate])
+  @@index([companyId])
+  @@index([brokerId])
+  @@map("subscriptions")
+}
+
+model SubscriptionPaymentProof {
+  id             Int          @id @default(autoincrement())
+  subscriptionId Int          @map("subscription_id")
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  receiptFile    String       @map("receipt_file")
+  status         String       @default("PENDING")
+  submittedById  Int?         @map("submitted_by")
+  reviewedAt     DateTime?    @map("reviewed_at") @db.Timestamptz(3)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([subscriptionId, status])
+  @@map("subscription_payment_proofs")
+}
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  name        String
+  description String?  @db.Text
+  module      String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  role         Role
+  permissionId Int        @map("permission_id")
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([role, permissionId])
+  @@map("role_permissions")
+}
+
+model Report {
+  id            Int        @id @default(autoincrement())
+  reportType    ReportType @map("report_type")
+  generatedDate DateTime   @default(now()) @map("generated_date")
+  generatedById Int        @map("generated_by")
+  generatedBy   User       @relation(fields: [generatedById], references: [id])
+  sector        String
+  summary       String?    @db.Text
+
+  @@map("reports")
+}
+
+model Favorite {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @map("user_id")
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sector   String
+  category String
+
+  @@unique([userId, sector, category])
+  @@map("favorites")
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int              @map("user_id")
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String           @db.Text
+  type      NotificationType @default(GENERAL)
+  sector    String           @default("system")
+  read      Boolean          @default(false)
+  senderId  Int?             @map("sender_id")
+  sender    User?            @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([userId, read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// Applicant <-> Super Admin registration chat (one thread per applicant user).
+model RegistrationMessage {
+  id           Int       @id @default(autoincrement())
+  threadUserId Int       @map("thread_user_id")
+  threadUser   User      @relation("MessageThread", fields: [threadUserId], references: [id], onDelete: Cascade)
+  senderId     Int       @map("sender_id")
+  sender       User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  body         String    @db.Text
+  readAt       DateTime? @map("read_at") @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([threadUserId, createdAt])
+  @@index([senderId])
+  @@map("registration_messages")
+}
+
+model SystemSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("system_settings")
+}
+
+model AdminSession {
+  id            String    @id
+  userId        Int       @map("user_id")
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role          Role
+  userAgentHash String    @map("user_agent_hash")
+  lastSeenAt    DateTime  @default(now()) @map("last_seen_at")
+  expiresAt     DateTime  @map("expires_at")
+  revokedAt     DateTime? @map("revoked_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+  @@map("admin_sessions")
+}
+
+model PasswordResetToken {
+  id          String    @id
+  userId      Int       @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique @map("token_hash")
+  codeHash    String?   @map("code_hash")
+  attempts    Int       @default(0)
+  lastSentAt  DateTime? @map("last_sent_at")
+  expiresAt   DateTime  @map("expires_at")
+  usedAt      DateTime? @map("used_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}

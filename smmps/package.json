@@ -1,0 +1,58 @@
+{
+  "name": "mmps",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node --max-http-header-size=65536 ./node_modules/next/dist/bin/next dev --turbopack",
+    "dev:webpack": "node --max-http-header-size=65536 ./node_modules/next/dist/bin/next dev --webpack",
+    "build": "prisma generate && next build",
+    "start": "node --max-http-header-size=65536 ./node_modules/next/dist/bin/next start",
+    "lint": "eslint",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
+    "db:push": "prisma db push",
+    "db:seed": "npx tsx prisma/seed.ts",
+    "db:seed-logins": "npx tsx scripts/seed-platform-logins.ts",
+    "db:sync-subscriptions": "npx tsx scripts/sync-subscriptions.ts",
+    "db:import-file-data": "tsx scripts/import-file-data.ts",
+    "db:studio": "prisma studio",
+    "postinstall": "node scripts/prisma-generate-safe.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^3.0.3",
+    "date-fns": "^4.4.0",
+    "exceljs": "^4.4.0",
+    "jose": "^6.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
+    "lucide-react": "^1.21.0",
+    "next": "16.2.9",
+    "nodemailer": "^9.0.5",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.9",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.4",
+    "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "@emnapi/core": "1.11.3",
+    "@emnapi/runtime": "1.11.3"
+  }
+}
